@@ -135,19 +135,27 @@ body{font-family:-apple-system,'Hiragino Kaku Gothic ProN','Yu Gothic',sans-seri
 .prev-modal-head{width:100%;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-shrink:0}
 .prev-modal-ttl{color:#fff;font-size:14px;font-weight:600}
 .prev-modal-close{background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:20px;padding:6px 14px;font-size:12px;cursor:pointer;-webkit-appearance:none}
-.prev-modal-body{display:flex;flex-direction:column;width:100%;max-width:340px;gap:0}
-.pm-slot{display:flex;align-items:center;gap:12px;position:relative;isolation:isolate}
+.prev-modal-body{display:flex;flex-direction:column;width:100%;max-width:380px;gap:0}
+.pm-slot{display:flex;align-items:center;gap:14px;position:relative;isolation:isolate}
 .pm-slot img{object-fit:contain;display:block;pointer-events:none;flex-shrink:0}
-.pm-slot.acce    img{height:65px;width:auto;max-width:160px} .pm-slot.acce    {margin-bottom:-8px;z-index:5}
-.pm-slot.onepiece img{height:200px;width:auto;max-width:200px}.pm-slot.onepiece{margin-bottom:-20px;z-index:3}
-.pm-slot.tops    img{height:115px;width:auto;max-width:190px}.pm-slot.tops    {margin-bottom:-15px;z-index:3}
-.pm-slot.bottoms img{height:105px;width:auto;max-width:185px}.pm-slot.bottoms {margin-bottom:-15px;z-index:2}
-.pm-slot.shoes   img{height:75px;width:auto;max-width:160px} .pm-slot.shoes   {z-index:4}
-.pm-info{flex:1;min-width:0}
-.pm-lbl{font-size:10px;color:var(--pkl);font-weight:700}
-.pm-name{font-size:12px;color:#fff;line-height:1.4;word-break:break-all}
-.pm-code{font-size:10px;color:rgba(255,255,255,.45);margin-top:1px}
-.pm-rm{background:rgba(255,255,255,.12);border:none;color:rgba(255,255,255,.6);border-radius:12px;padding:3px 8px;font-size:11px;cursor:pointer;margin-top:4px;-webkit-appearance:none}
+/* 画像エリアを左に固定幅で配置、テキストは右に */
+.pm-slot .pm-img-wrap{width:170px;display:flex;justify-content:center;align-items:center;flex-shrink:0}
+.pm-slot.acce    img{height:55px;max-width:140px}
+.pm-slot.onepiece img{height:150px;max-width:160px}
+.pm-slot.tops    img{height:90px;max-width:160px}
+.pm-slot.bottoms img{height:80px;max-width:150px}
+.pm-slot.shoes   img{height:65px;max-width:140px}
+/* 重なり調整：トップスとボトムスの被りを軽減 */
+.pm-slot.acce    {margin-bottom:-6px;z-index:5}
+.pm-slot.onepiece{margin-bottom:-10px;z-index:3}
+.pm-slot.tops    {margin-bottom:-8px;z-index:3}
+.pm-slot.bottoms {margin-bottom:-8px;z-index:2}
+.pm-slot.shoes   {z-index:4}
+.pm-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.pm-lbl{font-size:10px;color:var(--pkl);font-weight:700;letter-spacing:.04em}
+.pm-name{font-size:13px;color:#fff;line-height:1.35;word-break:break-all;font-weight:500}
+.pm-code{font-size:10px;color:rgba(255,255,255,.45)}
+.pm-rm{background:rgba(255,255,255,.12);border:none;color:rgba(255,255,255,.6);border-radius:12px;padding:3px 8px;font-size:11px;cursor:pointer;margin-top:6px;align-self:flex-start;-webkit-appearance:none}
 .pm-actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;justify-content:center;flex-shrink:0}
 .pm-actions button{padding:10px 18px;border-radius:24px;border:none;font-size:13px;font-weight:600;cursor:pointer;-webkit-appearance:none}
 .btn-cap{background:var(--pk);color:#fff}
@@ -475,7 +483,7 @@ function renderPrevModal(){
   body.innerHTML=slots.map(([key,cls,lbl])=>{
     const it=coord[key];if(!it)return'';
     return`<div class="pm-slot ${cls}">
-      <img src="${it.img||''}" alt="" onerror="this.style.opacity='.1'">
+      <div class="pm-img-wrap"><img src="${it.img||''}" alt="" onerror="this.style.opacity='.1'"></div>
       <div class="pm-info">
         <div class="pm-lbl">${lbl}</div>
         <div class="pm-name">${it.name}</div>
@@ -544,8 +552,8 @@ function setColor(v){
 /* ================================================================
    画像キャプチャ
 ================================================================ */
-const SH={acce:65,onepiece:200,tops:115,bottoms:105,shoes:75};
-const SM={acce:-8,onepiece:-20,tops:-15,bottoms:-15,shoes:0};
+const SH={acce:55,onepiece:150,tops:90,bottoms:80,shoes:65};
+const SM={acce:-6,onepiece:-10,tops:-8,bottoms:-8,shoes:0};
 async function captureCoord(){
   const slots=activeSlots();
   if(!slots.length)return;
