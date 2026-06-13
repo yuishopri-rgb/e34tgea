@@ -2,213 +2,269 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ミックスコーデ作成アプリ</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ミクコちゃん</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
   --pk:#E0659A;--pkl:#F4A7C3;--pkp:#FBE8F1;--pkd:#C94F84;
   --bg:#fff;--bg2:#F8F8FB;--bg3:#EFEFF5;
   --t1:#1a1a2e;--t2:#6b7280;--t3:#9ca3af;
-  --bd:rgba(0,0,0,.08);--bd2:rgba(0,0,0,.15);
+  --bd:rgba(0,0,0,.08);--bd2:rgba(0,0,0,.14);
   --r:10px;--rl:14px;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
 }
-body{font-family:'Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif;background:var(--bg3);color:var(--t1);min-height:100vh}
-.app{max-width:1100px;margin:0 auto;padding:10px;display:flex;flex-direction:column;gap:8px}
+html,body{height:100%;overflow:hidden}
+body{font-family:-apple-system,'Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif;background:var(--bg3);color:var(--t1);display:flex;flex-direction:column}
 
-/* ---- ヘッダー ---- */
-.hd{background:var(--bg);border-radius:var(--rl);padding:10px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+/* ヘッダー */
+.hd{background:var(--bg);padding:calc(8px + var(--safe-top)) 12px 8px;display:flex;align-items:center;gap:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);flex-shrink:0;z-index:10}
+.hd-icon{width:26px;height:26px;background:linear-gradient(135deg,#E0659A,#a78bfa);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;flex-shrink:0}
 .hd-ttl{font-size:15px;font-weight:700;background:linear-gradient(135deg,#E0659A,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hd-right{margin-left:auto;display:flex;align-items:center;gap:8px}
-.hd-sub{font-size:11px;color:var(--t3)}
-.hd-status{font-size:10px;color:var(--t3);display:flex;align-items:center;gap:4px}
-.dot{width:6px;height:6px;border-radius:50%;background:var(--t3)}
-.dot.ok{background:#10b981}.dot.loading{background:#f59e0b;animation:pulse 1s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hd-status{margin-left:auto;font-size:10px;color:var(--t3);display:flex;align-items:center;gap:4px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--t3);flex-shrink:0}
+.dot.ok{background:#10b981}
+.dot.loading{background:#f59e0b;animation:blink .8s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 
-/* ---- フィルター ---- */
-.flt{background:var(--bg);border-radius:var(--rl);padding:9px 13px;display:flex;flex-direction:column;gap:7px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
-.fr{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
-.fl{font-size:11px;color:var(--t2);min-width:30px;font-weight:500}
-.chips{display:flex;gap:3px;flex-wrap:wrap}
-.chip{padding:4px 9px;font-size:11px;border-radius:20px;border:.5px solid var(--bd2);background:var(--bg);color:var(--t2);cursor:pointer;user-select:none;white-space:nowrap;transition:.1s}
-.chip:hover{background:var(--bg2)}
-.chip.on{background:var(--pk);border-color:var(--pk);color:#fff;font-weight:500}
-.cdots{display:flex;gap:5px;align-items:center}
-.cdot{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2.5px solid transparent;flex-shrink:0;transition:.1s}
-.cdot.on{border-color:#222;transform:scale(1.18)}
-.sb{position:relative;flex:1;min-width:130px}
-.sb input{width:100%;padding:5px 9px 5px 27px;font-size:12px;border:.5px solid var(--bd2);border-radius:20px;background:var(--bg);color:var(--t1);outline:none}
-.sb input:focus{border-color:var(--pkl)}
-.sb::before{content:'🔍';position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:11px;pointer-events:none}
+/* 常時表示フィルターバー */
+.filter-bar{
+  background:var(--bg);
+  border-bottom:.5px solid var(--bd);
+  flex-shrink:0;
+  padding:6px 10px;
+  display:flex;flex-direction:column;gap:5px;
+}
+.fb-row{display:flex;align-items:center;gap:5px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.fb-row::-webkit-scrollbar{display:none}
+.fb-label{font-size:10px;color:var(--t3);white-space:nowrap;flex-shrink:0}
+.chip{padding:4px 9px;font-size:11px;border-radius:20px;border:.5px solid var(--bd2);background:var(--bg2);color:var(--t2);cursor:pointer;user-select:none;white-space:nowrap;flex-shrink:0;-webkit-appearance:none}
+.chip.on{background:var(--pk);border-color:var(--pk);color:#fff;font-weight:600}
+.cdot{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2.5px solid transparent;flex-shrink:0}
+.cdot.on{border-color:#333}
+/* 検索 */
+.search-row{position:relative;flex-shrink:0}
+.search-row input{
+  width:100%;padding:6px 10px 6px 28px;font-size:13px;
+  border:.5px solid var(--bd2);border-radius:20px;
+  background:var(--bg2);color:var(--t1);outline:none;
+  -webkit-appearance:none;
+}
+.search-row::before{content:'🔍';position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:11px;pointer-events:none}
 
-/* ---- メインレイアウト ---- */
-.main{display:grid;grid-template-columns:1fr 300px;gap:8px}
-@media(max-width:660px){.main{grid-template-columns:1fr}}
+/* メインレイアウト */
+.main{flex:1;display:flex;min-height:0;overflow:hidden;gap:8px;padding:8px}
+@media(max-width:699px){.main{padding:6px;gap:0}}
 
-/* ---- アイテムパネル ---- */
-.pnl{background:var(--bg);border-radius:var(--rl);overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.07);display:flex;flex-direction:column}
-.ph{padding:7px 11px;font-size:11px;font-weight:500;color:var(--t2);background:var(--bg2);border-bottom:.5px solid var(--bd);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
-.isc{overflow-y:auto;padding:7px;max-height:540px}
-.ig{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:6px}
-
-.ic{border-radius:var(--r);cursor:pointer;border:2px solid transparent;background:var(--bg2);display:flex;flex-direction:column;align-items:center;padding:5px 4px 4px;gap:3px;position:relative;transition:.12s}
-.ic:hover{border-color:var(--pkl);transform:scale(1.04)}
+/* アイテムパネル */
+.item-panel{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden;background:var(--bg);border-radius:var(--rl);box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.item-header{padding:6px 10px;font-size:11px;font-weight:500;color:var(--t2);background:var(--bg2);border-bottom:.5px solid var(--bd);display:flex;align-items:center;flex-shrink:0}
+.item-count{font-size:10px;color:var(--t3);margin-left:auto}
+.item-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:6px}
+.item-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:5px}
+.ic{border-radius:8px;cursor:pointer;border:2px solid transparent;background:var(--bg2);display:flex;flex-direction:column;align-items:center;padding:5px 3px 3px;gap:2px;position:relative}
 .ic.sel{border-color:var(--pk);background:var(--pkp)}
-.ic img{width:100%;aspect-ratio:1;object-fit:contain;background:#fff;border-radius:6px}
-.ic .nm{font-size:9px;color:var(--t2);text-align:center;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;width:100%}
-.bdg{position:absolute;font-size:8px;padding:1px 4px;border-radius:4px;font-weight:600;line-height:1.5}
-.bs{top:3px;left:3px}.bp{top:3px;right:3px}
+.ic img{width:100%;aspect-ratio:1;object-fit:contain;background:#fff;border-radius:5px;display:block}
+.ic .nm{font-size:8px;color:var(--t2);text-align:center;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;width:100%}
+.no-img{width:100%;aspect-ratio:1;background:var(--bg3);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:7px;color:var(--t3);text-align:center;padding:2px}
+.bdg{position:absolute;font-size:7px;padding:1px 3px;border-radius:3px;font-weight:700;line-height:1.5}
+.bs{top:2px;left:2px}.bp{top:2px;right:2px}
 .bai{background:#FFE4F0;color:#B5316A}.bpm{background:#E4EEFF;color:#2A5AAF}
 .bワンピース{background:#FCE4EC;color:#A01A55}
 .bトップス{background:#FFECD6;color:#C05A00}
 .bボトムス{background:#E8F5E9;color:#1B6B2F}
 .bシューズ{background:#E8EAF6;color:#3949AB}
 .bアクセサリ{background:#FFF9C4;color:#827717}
-.no-img{width:100%;aspect-ratio:1;background:var(--bg3);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--t3)}
-.msg{text-align:center;padding:40px;color:var(--t3);font-size:12px;grid-column:1/-1}
+.msg{text-align:center;padding:30px 10px;color:var(--t3);font-size:12px;grid-column:1/-1}
 
-/* ---- プレビューパネル ---- */
-.prev-panel{background:var(--bg);border-radius:var(--rl);box-shadow:0 1px 4px rgba(0,0,0,.07);display:flex;flex-direction:column;overflow:hidden}
-.ph2{padding:7px 11px;font-size:11px;font-weight:500;color:var(--t2);background:var(--bg2);border-bottom:.5px solid var(--bd);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
-.prev-stage{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 8px;gap:0;min-height:400px;max-height:540px;overflow-y:auto;background:linear-gradient(160deg,#fff8fc,#f0f0ff);position:relative}
-.prev-empty{flex:1;display:flex;align-items:center;justify-content:center;color:var(--t3);font-size:12px;text-align:center;line-height:2}
+/* フローティングプレビュー（スマホ右下） */
+.float-prev{
+  position:fixed;right:12px;bottom:calc(12px + var(--safe-bottom));
+  width:88px;
+  background:rgba(255,255,255,.97);
+  border-radius:16px;border:.5px solid var(--pkl);
+  box-shadow:0 4px 18px rgba(224,101,154,.3);
+  z-index:50;overflow:hidden;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;
+  padding:5px 3px 4px;gap:0;
+}
+.float-lbl{font-size:8px;color:var(--pk);font-weight:700;margin-bottom:1px}
+.float-empty{width:80px;height:110px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--t3);text-align:center;line-height:1.5}
+.fp-slot{display:flex;flex-direction:column;align-items:center;width:80px;position:relative;isolation:isolate}
+.fp-slot img{object-fit:contain;display:block;width:100%;pointer-events:none}
+.fp-slot.acce    img{height:26px} .fp-slot.acce    {margin-bottom:-3px;z-index:5}
+.fp-slot.onepiece img{height:76px}.fp-slot.onepiece{margin-bottom:-8px;z-index:3}
+.fp-slot.tops    img{height:44px} .fp-slot.tops    {margin-bottom:-5px;z-index:3}
+.fp-slot.bottoms img{height:38px} .fp-slot.bottoms {margin-bottom:-5px;z-index:2}
+.fp-slot.shoes   img{height:28px} .fp-slot.shoes   {z-index:4}
+.float-tap{font-size:8px;color:var(--pk);margin-top:3px;opacity:.7}
 
-/* 縦積みスロット */
-.pslot{display:flex;flex-direction:column;align-items:center;position:relative;width:200px}
-.pslot img{object-fit:contain;display:block;width:100%}
-/* 各パーツの高さ・マージン */
-.pslot.acce     {z-index:5;margin-bottom:-12px} .pslot.acce     img{height:80px}
-.pslot.onepiece {z-index:3;margin-bottom:-22px} .pslot.onepiece img{height:220px}
-.pslot.tops     {z-index:3;margin-bottom:-16px} .pslot.tops     img{height:130px}
-.pslot.bottoms  {z-index:2;margin-bottom:-16px} .pslot.bottoms  img{height:115px}
-.pslot.shoes    {z-index:4}                      .pslot.shoes    img{height:85px}
-.pslot-lbl{font-size:9px;color:var(--pk);font-weight:700;margin-bottom:2px}
-.pslot-name{font-size:9px;color:var(--t2);text-align:center;margin-top:4px;background:rgba(255,255,255,.85);border-radius:6px;padding:1px 6px;max-width:190px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.rm-btn{position:absolute;top:14px;right:2px;width:18px;height:18px;border-radius:50%;background:var(--pkl);color:#fff;border:none;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;z-index:10}
-.rm-btn:hover{background:var(--pk)}
-.pslot-empty{width:180px;border:1.5px dashed var(--pkl);border-radius:var(--r);display:flex;align-items:center;justify-content:center;color:var(--pkl);font-size:10px;margin:3px 0}
-.pslot-empty.acce{height:70px}.pslot-empty.onepiece{height:200px}
-.pslot-empty.tops{height:115px}.pslot-empty.bottoms{height:100px}.pslot-empty.shoes{height:75px}
+/* PCサイドプレビュー */
+@media(min-width:700px){
+  .float-prev{display:none}
+  .side-prev{
+    width:270px;flex-shrink:0;
+    background:var(--bg);border-radius:var(--rl);
+    box-shadow:0 1px 4px rgba(0,0,0,.07);
+    display:flex;flex-direction:column;overflow:hidden;
+  }
+  .side-prev-hd{padding:7px 10px;font-size:11px;font-weight:600;color:var(--t2);background:var(--bg2);border-bottom:.5px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+  .side-prev-stage{flex:1;overflow-y:auto;display:flex;flex-direction:column;align-items:center;padding:8px;background:linear-gradient(160deg,#fff8fc,#f0f0ff)}
+  .side-prev-actions{padding:7px 8px;display:flex;gap:5px;justify-content:center;border-top:.5px solid var(--bd);flex-shrink:0}
+  /* PCのfp-slotは大きめ */
+  .side-prev .fp-slot{width:150px}
+  .side-prev .fp-slot.acce    img{height:55px} .side-prev .fp-slot.acce    {margin-bottom:-8px}
+  .side-prev .fp-slot.onepiece img{height:160px}.side-prev .fp-slot.onepiece{margin-bottom:-18px}
+  .side-prev .fp-slot.tops    img{height:90px} .side-prev .fp-slot.tops    {margin-bottom:-12px}
+  .side-prev .fp-slot.bottoms img{height:82px} .side-prev .fp-slot.bottoms {margin-bottom:-12px}
+  .side-prev .fp-slot.shoes   img{height:62px}
+  .side-prev .float-empty{width:150px;height:180px}
+}
+@media(max-width:699px){.side-prev{display:none}}
 
-.pact{padding:7px 10px 9px;display:flex;gap:5px;justify-content:center;border-top:.5px solid var(--bd);flex-shrink:0}
-.btn{padding:6px 13px;font-size:11px;border-radius:20px;cursor:pointer;border:.5px solid var(--bd2)}
-.bo{background:var(--bg);color:var(--t2)}.bo:hover{background:var(--bg2)}
-.bpr{background:var(--pk);color:#fff;border:none;font-weight:500}.bpr:hover{background:var(--pkd)}
+/* 全画面プレビューモーダル */
+.prev-modal{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(15,10,25,.93);
+  display:none;flex-direction:column;align-items:center;
+  padding:calc(14px + var(--safe-top)) 14px calc(14px + var(--safe-bottom));
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+}
+.prev-modal.open{display:flex}
+.prev-modal-head{width:100%;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-shrink:0}
+.prev-modal-ttl{color:#fff;font-size:14px;font-weight:600}
+.prev-modal-close{background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:20px;padding:6px 14px;font-size:12px;cursor:pointer;-webkit-appearance:none}
+.prev-modal-body{display:flex;flex-direction:column;width:100%;max-width:340px;gap:0}
+.pm-slot{display:flex;align-items:center;gap:12px;position:relative;isolation:isolate}
+.pm-slot img{object-fit:contain;display:block;pointer-events:none;flex-shrink:0}
+.pm-slot.acce    img{height:65px;width:auto;max-width:160px} .pm-slot.acce    {margin-bottom:-8px;z-index:5}
+.pm-slot.onepiece img{height:200px;width:auto;max-width:200px}.pm-slot.onepiece{margin-bottom:-20px;z-index:3}
+.pm-slot.tops    img{height:115px;width:auto;max-width:190px}.pm-slot.tops    {margin-bottom:-15px;z-index:3}
+.pm-slot.bottoms img{height:105px;width:auto;max-width:185px}.pm-slot.bottoms {margin-bottom:-15px;z-index:2}
+.pm-slot.shoes   img{height:75px;width:auto;max-width:160px} .pm-slot.shoes   {z-index:4}
+.pm-info{flex:1;min-width:0}
+.pm-lbl{font-size:10px;color:var(--pkl);font-weight:700}
+.pm-name{font-size:12px;color:#fff;line-height:1.4;word-break:break-all}
+.pm-code{font-size:10px;color:rgba(255,255,255,.45);margin-top:1px}
+.pm-rm{background:rgba(255,255,255,.12);border:none;color:rgba(255,255,255,.6);border-radius:12px;padding:3px 8px;font-size:11px;cursor:pointer;margin-top:4px;-webkit-appearance:none}
+.pm-actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;justify-content:center;flex-shrink:0}
+.pm-actions button{padding:10px 18px;border-radius:24px;border:none;font-size:13px;font-weight:600;cursor:pointer;-webkit-appearance:none}
+.btn-cap{background:var(--pk);color:#fff}
+.btn-rnd{background:rgba(255,255,255,.15);color:#fff}
+.btn-clr{background:rgba(255,255,255,.08);color:rgba(255,255,255,.6)}
 
-/* ---- 保存済みコーデバー ---- */
-.sv{background:var(--bg);border-radius:var(--rl);padding:7px 13px;display:flex;gap:7px;align-items:center;flex-wrap:wrap;box-shadow:0 1px 4px rgba(0,0,0,.07)}
-.sc2{padding:4px 10px;font-size:11px;border-radius:20px;background:var(--bg2);border:.5px solid var(--bd);cursor:pointer;color:var(--t2)}
-.sc2:hover{border-color:var(--pkl);color:var(--pk)}
-
-/* ---- 全画面保存ポップアップ ---- */
-#save-overlay{position:fixed;inset:0;background:rgba(15,10,25,.92);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;overflow-y:auto}
-.save-header{display:flex;gap:10px;margin-bottom:18px;align-items:center;flex-wrap:wrap;justify-content:center}
-.save-header button{padding:10px 20px;border-radius:24px;border:none;font-size:13px;font-weight:600;cursor:pointer}
-.save-capture{background:var(--pk);color:#fff}
-.save-capture:hover{background:var(--pkd)}
-.save-close{background:rgba(255,255,255,.15);color:#fff}
-.save-close:hover{background:rgba(255,255,255,.25)}
-.save-toggle{display:flex;align-items:center;gap:6px;color:#fff;font-size:12px;cursor:pointer}
-#popup-stage{display:flex;flex-direction:column;align-items:flex-start}
-.popup-row{display:flex;align-items:center}
-.popup-row img{object-fit:contain;display:block}
-.popup-name{margin-left:16px;color:#fff;font-size:12px;line-height:1.5;text-shadow:0 1px 3px rgba(0,0,0,.8);min-width:120px}
-.popup-name-lbl{font-size:10px;color:var(--pkl);font-weight:600}
+.btn{padding:5px 12px;font-size:11px;border-radius:20px;cursor:pointer;border:.5px solid var(--bd2);-webkit-appearance:none}
+.bo{background:var(--bg);color:var(--t2)}
+.bpr{background:var(--pk);color:#fff;border:none;font-weight:600}
 </style>
 </head>
 <body>
-<div class="app">
 
 <!-- ヘッダー -->
 <div class="hd">
-  <div style="width:28px;height:28px;background:linear-gradient(135deg,#E0659A,#a78bfa);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;flex-shrink:0">✦</div>
-  <div class="hd-ttl">ミックスコーデ作成アプリ</div>
-  <div class="hd-right">
-    <div class="hd-status">
-      <div class="dot" id="load-dot"></div>
-      <span id="load-txt">読み込み中...</span>
-    </div>
-    <div class="hd-sub">アイプリ × プリマジ</div>
+  <div class="hd-icon">✦</div>
+  <div class="hd-ttl">ミクコちゃん</div>
+  <div class="hd-status">
+    <div class="dot loading" id="load-dot"></div>
+    <span id="load-txt">読み込み中...</span>
   </div>
 </div>
 
-<!-- フィルター -->
-<div class="flt">
-  <div class="fr">
-    <span class="fl">作品</span>
-    <div class="chips" id="sc">
-      <div class="chip on" onclick="setSrc('all')">すべて</div>
-      <div class="chip" onclick="setSrc('aipri')">アイプリ</div>
-      <div class="chip" onclick="setSrc('primagi')">プリマジ</div>
-    </div>
-    <div class="sb" style="margin-left:auto">
-      <input type="text" placeholder="コーデ名・カードIDで検索..." id="q" oninput="render()">
-    </div>
+<!-- 常時表示フィルターバー -->
+<div class="filter-bar">
+  <!-- 検索 -->
+  <div class="search-row">
+    <input type="search" placeholder="コーデ名・IDで検索..." id="q" oninput="render()" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
   </div>
-  <div class="fr">
-    <span class="fl">シリーズ</span>
-    <div class="chips" id="brand-chips"></div>
+  <!-- 作品フィルター -->
+  <div class="fb-row">
+    <span class="fb-label">作品</span>
+    <div class="chip on" id="src-all"      onclick="setSrc('all')">すべて</div>
+    <div class="chip"    id="src-aipri"    onclick="setSrc('aipri')">アイプリ</div>
+    <div class="chip"    id="src-primagi"  onclick="setSrc('primagi')">プリマジ</div>
   </div>
-  <div class="fr">
-    <span class="fl">パーツ</span>
-    <div class="chips" id="pc">
-      <div class="chip on" onclick="setPart('all')">すべて</div>
-      <div class="chip" onclick="setPart('ワンピース')">ワンピ</div>
-      <div class="chip" onclick="setPart('トップス')">トップス</div>
-      <div class="chip" onclick="setPart('ボトムス')">ボトムス</div>
-      <div class="chip" onclick="setPart('シューズ')">シューズ</div>
-      <div class="chip" onclick="setPart('アクセサリ')">アクセ</div>
-    </div>
+  <!-- パーツフィルター -->
+  <div class="fb-row">
+    <span class="fb-label">パーツ</span>
+    <div class="chip on" id="part-all"      onclick="setPart('all')">すべて</div>
+    <div class="chip"    id="part-ワンピース" onclick="setPart('ワンピース')">ワンピ</div>
+    <div class="chip"    id="part-トップス"  onclick="setPart('トップス')">トップス</div>
+    <div class="chip"    id="part-ボトムス"  onclick="setPart('ボトムス')">ボトムス</div>
+    <div class="chip"    id="part-シューズ"  onclick="setPart('シューズ')">シューズ</div>
+    <div class="chip"    id="part-アクセサリ" onclick="setPart('アクセサリ')">アクセ</div>
   </div>
-  <div class="fr">
-    <span class="fl">色</span>
-    <div class="cdots">
-      <div class="cdot on" id="cd-" style="background:conic-gradient(#FF8FAB,#FFD166,#A0E7E5,#C7CEEA,#fff)" onclick="setColor('')"></div>
-      <div class="cdot" id="cd-ピンク"   style="background:#FF8FAB" onclick="setColor('ピンク')"></div>
-      <div class="cdot" id="cd-イエロー" style="background:#FFD166" onclick="setColor('イエロー')"></div>
-      <div class="cdot" id="cd-ブルー"   style="background:#7EC8E3" onclick="setColor('ブルー')"></div>
-      <div class="cdot" id="cd-グリーン" style="background:#B5EAD7" onclick="setColor('グリーン')"></div>
-      <div class="cdot" id="cd-パープル" style="background:#C7CEEA" onclick="setColor('パープル')"></div>
-      <div class="cdot" id="cd-オレンジ" style="background:#FFB347" onclick="setColor('オレンジ')"></div>
-      <div class="cdot" id="cd-ホワイト" style="background:#f0f0f0;border:.5px solid #ccc" onclick="setColor('ホワイト')"></div>
-      <div class="cdot" id="cd-ブラック" style="background:#555" onclick="setColor('ブラック')"></div>
-    </div>
+  <!-- 色フィルター -->
+  <div class="fb-row">
+    <span class="fb-label">色</span>
+    <div class="cdot on" id="cd-" style="background:conic-gradient(#FF8FAB,#FFD166,#A0E7E5,#C7CEEA,#fff)" onclick="setColor('')"></div>
+    <div class="cdot" id="cd-ピンク"   style="background:#FF8FAB" onclick="setColor('ピンク')"></div>
+    <div class="cdot" id="cd-イエロー" style="background:#FFD166" onclick="setColor('イエロー')"></div>
+    <div class="cdot" id="cd-ブルー"   style="background:#7EC8E3" onclick="setColor('ブルー')"></div>
+    <div class="cdot" id="cd-グリーン" style="background:#B5EAD7" onclick="setColor('グリーン')"></div>
+    <div class="cdot" id="cd-パープル" style="background:#C7CEEA" onclick="setColor('パープル')"></div>
+    <div class="cdot" id="cd-オレンジ" style="background:#FFB347" onclick="setColor('オレンジ')"></div>
+    <div class="cdot" id="cd-ホワイト" style="background:#f0f0f0;border:.5px solid #ccc" onclick="setColor('ホワイト')"></div>
+    <div class="cdot" id="cd-ブラック" style="background:#555" onclick="setColor('ブラック')"></div>
   </div>
 </div>
 
 <!-- メイン -->
 <div class="main">
-  <div class="pnl">
-    <div class="ph">
-      <span id="ptitle">アイテム一覧</span>
-      <span id="pcnt" style="font-size:10px;color:var(--t3)"></span>
+
+  <!-- アイテムパネル -->
+  <div class="item-panel">
+    <div class="item-header">
+      <span>アイテム一覧</span>
+      <span class="item-count" id="pcnt"></span>
     </div>
-    <div class="isc"><div class="ig" id="grid"><div class="msg">データを読み込み中...</div></div></div>
+    <div class="item-scroll">
+      <div class="item-grid" id="grid">
+        <div class="msg">データを読み込み中...</div>
+      </div>
+    </div>
   </div>
 
-  <div class="prev-panel">
-    <div class="ph2">
-      <span>コーデプレビュー</span>
-      <button class="btn bo" style="font-size:10px;padding:3px 8px" onclick="rnd()">ランダム ✦</button>
+  <!-- PCサイドプレビュー -->
+  <div class="side-prev">
+    <div class="side-prev-hd">
+      <span>プレビュー</span>
+      <button onclick="rnd()" class="btn bo" style="font-size:10px;padding:3px 8px">ランダム</button>
     </div>
-    <div class="prev-stage" id="prev-stage">
-      <div class="prev-empty">アイテムを選んで<br>コーデを作ろう♪</div>
+    <div class="side-prev-stage" id="side-stage">
+      <div class="float-empty" id="side-empty">アイテムを選んで♪</div>
     </div>
-    <div class="pact">
+    <div class="side-prev-actions">
       <button class="btn bo" onclick="clr()">リセット</button>
-      <button class="btn bpr" onclick="showSavePopup()">保存 / 画像出力</button>
+      <button class="btn bpr" onclick="openPrevModal()">保存 / 出力</button>
     </div>
   </div>
+
 </div>
 
-<!-- 保存済みコーデ -->
-<div class="sv" id="svbar" style="display:none">
-  <span style="font-size:11px;color:var(--t2);font-weight:500">保存したコーデ</span>
-  <div id="svlist" style="display:flex;gap:5px;flex-wrap:wrap"></div>
+<!-- フローティングプレビュー（スマホのみ） -->
+<div class="float-prev" id="float-prev" onclick="openPrevModal()">
+  <div class="float-lbl">コーデ</div>
+  <div class="float-empty" id="float-empty">タップ<br>で確認</div>
+  <div id="float-slots"></div>
+  <div class="float-tap" id="float-tap" style="display:none">タップで拡大</div>
 </div>
 
-</div><!-- .app -->
+<!-- 全画面プレビューモーダル -->
+<div class="prev-modal" id="prev-modal">
+  <div class="prev-modal-head">
+    <span class="prev-modal-ttl">ミクコちゃん</span>
+    <button class="prev-modal-close" onclick="closePrevModal()">✕ 閉じる</button>
+  </div>
+  <div class="prev-modal-body" id="prev-modal-body">
+    <p style="color:rgba(255,255,255,.5);font-size:13px;text-align:center">アイテムを選んでください</p>
+  </div>
+  <div class="pm-actions">
+    <button class="btn-cap" onclick="captureCoord()">📸 画像を保存</button>
+    <button class="btn-rnd" onclick="rnd()">ランダム ✦</button>
+    <button class="btn-clr" onclick="clr();closePrevModal()">リセット</button>
+  </div>
+</div>
 
 <script>
 /* ================================================================
@@ -220,9 +276,9 @@ const MANIFEST_URL = GITHUB_RAW + 'manifest.json';
 /* ================================================================
    色判定
 ================================================================ */
-const CK = {
-  'ピンク':  ['ピンク','ローズ','いちご','チェリー','ラズベリー','ベリー','コーラル','ハート'],
-  'ブルー':  ['ブルー','スカイ','ネイビー','みずいろ','ソーダ','マリン','アクア'],
+const CK={
+  'ピンク':['ピンク','ローズ','いちご','チェリー','ラズベリー','ベリー','コーラル','ハート'],
+  'ブルー':['ブルー','スカイ','ネイビー','みずいろ','ソーダ','マリン','アクア'],
   'イエロー':['イエロー','ゴールド','レモン','ひまわり','サンシャイン','バナナ'],
   'グリーン':['グリーン','ミント','リーフ','モスグリーン','エメラルド','マスカット'],
   'パープル':['パープル','ラベンダー','バイオレット','ライラック','グレープ','ミッドナイト'],
@@ -233,24 +289,22 @@ const CK = {
 function dc(n){for(const[c,kw]of Object.entries(CK))if(kw.some(k=>n.includes(k)))return c;return 'その他';}
 
 /* ================================================================
-   CSV パーサー（共通フォーマット）
-   brand,card_id,coord_name,part,img_url
+   CSV パーサー
 ================================================================ */
-function parseCsv(text) {
-  const lines = text.replace(/^\uFEFF/,'').split(/\r?\n/).filter(l=>l.trim());
-  const start = lines[0].startsWith('brand') ? 1 : 0;
-  const rows = [];
-  for (const line of lines.slice(start)) {
-    const cols = [];
-    let cur = '', inQ = false;
-    for (let i = 0; i < line.length; i++) {
-      const c = line[i];
-      if (c === '"') { if (inQ && line[i+1]==='"'){cur+='"';i++;} else inQ=!inQ; }
-      else if (c === ',' && !inQ) { cols.push(cur); cur = ''; }
-      else cur += c;
+function parseCsv(text){
+  const lines=text.replace(/^\uFEFF/,'').split(/\r?\n/).filter(l=>l.trim());
+  const start=/^brand/i.test(lines[0])?1:0;
+  const rows=[];
+  for(const line of lines.slice(start)){
+    const cols=[];let cur='',inQ=false;
+    for(let i=0;i<line.length;i++){
+      const c=line[i];
+      if(c==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
+      else if(c===','&&!inQ){cols.push(cur);cur='';}
+      else cur+=c;
     }
     cols.push(cur);
-    if (cols.length >= 5) rows.push(cols);
+    if(cols.length>=5)rows.push(cols);
   }
   return rows;
 }
@@ -258,364 +312,283 @@ function parseCsv(text) {
 /* ================================================================
    状態
 ================================================================ */
-let ALL = [];
-let fSrc='all', fPart='all', fColor='', fBrand='all';
-let coord = {}, saved = [];
-let brands = new Set();
+let ALL=[],fSrc='all',fPart='all',fColor='',fBrand='all';
+let coord={},brands=new Set();
 
 /* ================================================================
-   GitHub Pages からデータ自動ロード
+   データロード（直列でエラーに強く）
 ================================================================ */
-async function loadData() {
-  const dot = document.getElementById('load-dot');
-  const txt = document.getElementById('load-txt');
-  dot.className = 'dot loading';
+async function loadData(){
+  const dot=document.getElementById('load-dot');
+  const txt=document.getElementById('load-txt');
+  dot.className='dot loading';
 
-  try {
-    // manifest.json を取得
-    const mRes = await fetch(MANIFEST_URL + '?t=' + Date.now());
-    if (!mRes.ok) throw new Error('manifest取得失敗');
-    const manifest = await mRes.json();
-
-    const allFiles = [...manifest.files.aipri, ...manifest.files.primagi];
-    let loaded = 0, total = allFiles.length;
-
-    // 全CSVを並列fetch（404は無視）
-    await Promise.all(allFiles.map(async ({file, label}) => {
-      try {
-        const res = await fetch(GITHUB_RAW + file + '?t=' + Date.now());
-        if (!res.ok) return; // ファイルがまだない場合はスキップ
-        const text = await res.text();
-        const rows = parseCsv(text);
-        const src = file.startsWith('data/aipri') ? 'aipri' : 'primagi';
-        const existing = new Set(ALL.map(x=>x.id));
-        for (const [brand, cardId, name, part, imgUrl] of rows) {
-          const id = src + '_' + cardId + '_' + part;
-          if (existing.has(id)) continue;
-          ALL.push({id, code:cardId, name, part, src, brand, img:imgUrl, color:dc(name)});
-          brands.add(brand);
-        }
-        loaded++;
-        txt.textContent = `読み込み中... ${loaded}/${total}`;
-      } catch(e) { /* スキップ */ }
-    }));
-
-    dot.className = 'dot ok';
-    txt.textContent = `${ALL.length}件読み込み完了`;
-    renderBrandChips();
-    render();
-
-  } catch(e) {
-    dot.className = 'dot';
-    txt.textContent = 'データ読み込みエラー';
-    console.error(e);
-    document.getElementById('grid').innerHTML = `<div class="msg">データの読み込みに失敗しました。<br>GitHubにデータを配置してください。</div>`;
+  // manifest取得
+  let manifest;
+  try{
+    const res=await fetch(MANIFEST_URL);
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    manifest=await res.json();
+  }catch(e){
+    dot.className='dot';
+    txt.textContent='manifest失敗: '+e.message;
+    document.getElementById('grid').innerHTML='<div class="msg">データ読み込み失敗<br>'+e.message+'</div>';
+    return;
   }
+
+  const allFiles=[...manifest.files.aipri,...manifest.files.primagi];
+  let loaded=0,total=allFiles.length;
+  txt.textContent='0/'+total;
+
+  // 各CSVを直列fetch（並列はSafariで詰まることがある）
+  for(const {file,label} of allFiles){
+    try{
+      const res=await fetch(GITHUB_RAW+file);
+      if(!res.ok){loaded++;txt.textContent=loaded+'/'+total;continue;}
+      const text=await res.text();
+      const rows=parseCsv(text);
+      // AP_,APR_,OAP_,APSP_ → aipri、それ以外 → primagi
+      const src=/\/(AP_|APR_|OAP_|APSP_)/.test(file)?'aipri':'primagi';
+      const existing=new Set(ALL.map(x=>x.id));
+      for(const[brand,cardId,name,part,imgUrl]of rows){
+        const id=src+'_'+cardId+'_'+part;
+        if(existing.has(id))continue;
+        ALL.push({id,code:cardId,name,part,src,brand,img:imgUrl.trim(),color:dc(name)});
+        brands.add(brand);
+      }
+    }catch(e){/* ファイルがなければスキップ */}
+    loaded++;
+    txt.textContent=loaded+'/'+total;
+    render(); // 逐次更新
+  }
+
+  dot.className='dot ok';
+  txt.textContent=ALL.length+'件';
+  render();
 }
 
 /* ================================================================
-   描画
+   描画（Safari対応: rAF + イベント委譲）
 ================================================================ */
-function filtered() {
-  const q = (document.getElementById('q').value || '').toLowerCase();
-  return ALL.filter(it => {
-    if (fSrc !== 'all' && it.src !== fSrc) return false;
-    if (fPart !== 'all' && it.part !== fPart) return false;
-    if (fColor && it.color !== fColor) return false;
-    if (fBrand !== 'all' && it.brand !== fBrand) return false;
-    if (q && !it.name.toLowerCase().includes(q) && !it.code.toLowerCase().includes(q)) return false;
+let rPending=false;
+function render(){
+  if(rPending)return;rPending=true;
+  requestAnimationFrame(()=>{rPending=false;_render();});
+}
+function filtered(){
+  const q=(document.getElementById('q').value||'').toLowerCase();
+  return ALL.filter(it=>{
+    if(fSrc!=='all'&&it.src!==fSrc)return false;
+    if(fPart!=='all'&&it.part!==fPart)return false;
+    if(fColor&&it.color!==fColor)return false;
+    if(fBrand!=='all'&&it.brand!==fBrand)return false;
+    if(q&&!it.name.toLowerCase().includes(q)&&!it.code.toLowerCase().includes(q))return false;
     return true;
   });
 }
-
-function render() {
-  const list = filtered();
-  document.getElementById('pcnt').textContent = list.length + '件';
-  const g = document.getElementById('grid');
-  if (!list.length) {
-    g.innerHTML = `<div class="msg">${ALL.length ? '該当なし' : 'データ読み込み中...'}</div>`;
+function _render(){
+  const list=filtered();
+  document.getElementById('pcnt').textContent=list.length+'件';
+  const g=document.getElementById('grid');
+  if(!list.length){
+    g.innerHTML=`<div class="msg">${ALL.length?'該当なし':'読み込み中...'}</div>`;
     return;
   }
-  g.innerHTML = list.map(it => {
-    const sel = coord[it.part] && coord[it.part].id === it.id;
-    const pl = it.part === 'アクセサリ' ? 'アクセ' : it.part;
-    return `<div class="ic${sel?' sel':''}" onclick="pick('${it.id}')">
+  g.innerHTML=list.map(it=>{
+    const sel=coord[it.part]&&coord[it.part].id===it.id;
+    const pl=it.part==='アクセサリ'?'アクセ':it.part;
+    return`<div class="ic${sel?' sel':''}" data-id="${it.id}">
       <div class="bdg bs ${it.src==='aipri'?'bai':'bpm'}">${it.src==='aipri'?'AI':'PM'}</div>
       <div class="bdg bp b${it.part}">${pl}</div>
-      ${it.img
-        ? `<img src="${it.img}" alt="${it.name}" loading="lazy" onerror="this.style.opacity='.1'">`
-        : `<div class="no-img">${it.code}</div>`}
+      ${it.img?`<img src="${it.img}" alt="" loading="lazy" decoding="async">`:`<div class="no-img">${it.code}</div>`}
       <div class="nm">${it.name}</div>
     </div>`;
   }).join('');
 }
+// イベント委譲（Safariフリーズ防止）
+document.getElementById('grid').addEventListener('click',e=>{
+  const ic=e.target.closest('.ic');if(!ic)return;
+  pick(ic.dataset.id);
+});
 
-function renderPrev() {
-  const s = document.getElementById('prev-stage');
-  const ac=coord['アクセサリ'], op=coord['ワンピース'], tp=coord['トップス'], bt=coord['ボトムス'], sh=coord['シューズ'];
-  if (!ac && !op && !tp && !bt && !sh) {
-    s.innerHTML = '<div class="prev-empty">アイテムを選んで<br>コーデを作ろう♪</div>';
+/* ================================================================
+   プレビュー描画
+================================================================ */
+const SLOT_DEFS=[
+  ['アクセサリ','acce','アクセ'],
+  ['ワンピース','onepiece','ワンピース'],
+  ['トップス','tops','トップス'],
+  ['ボトムス','bottoms','ボトムス'],
+  ['シューズ','shoes','シューズ'],
+];
+function activeSlots(){
+  return SLOT_DEFS.filter(([key])=>{
+    if(key==='ワンピース')return !!coord['ワンピース'];
+    if(key==='トップス')  return !coord['ワンピース']&&!!coord['トップス'];
+    if(key==='ボトムス')  return !coord['ワンピース']&&!!coord['ボトムス'];
+    return !!coord[key];
+  });
+}
+
+function renderFloatPrev(){
+  const slots=activeSlots();
+  const empty=document.getElementById('float-empty');
+  const slotsEl=document.getElementById('float-slots');
+  const tap=document.getElementById('float-tap');
+  // サイドプレビュー（PC）
+  const sideEmpty=document.getElementById('side-empty');
+  const sideStage=document.getElementById('side-stage');
+
+  if(!slots.length){
+    empty.style.display='flex';slotsEl.innerHTML='';tap.style.display='none';
+    if(sideEmpty)sideEmpty.style.display='flex';
+    sideStage.querySelectorAll('.fp-slot').forEach(e=>e.remove());
     return;
   }
-  const slot = (it, cls, lbl) => it
-    ? `<div class="pslot ${cls}">
-        <div class="pslot-lbl">${lbl}</div>
-        <img src="${it.img||''}" alt="${it.name}" onerror="this.style.opacity='.1'">
-        <div class="pslot-name">${it.name}</div>
-        <button class="rm-btn" onclick="rmSlot('${it.part}')">✕</button>
-       </div>`
-    : `<div class="pslot-empty ${cls}">${lbl}を選ぼう</div>`;
+  empty.style.display='none';tap.style.display='block';
+  if(sideEmpty)sideEmpty.style.display='none';
 
-  s.innerHTML =
-    slot(ac, 'acce', 'アクセサリ') +
-    (op ? slot(op, 'onepiece', 'ワンピース')
-        : slot(tp, 'tops', 'トップス') + slot(bt, 'bottoms', 'ボトムス')) +
-    slot(sh, 'shoes', 'シューズ');
+  // フローティング（スマホ）
+  slotsEl.innerHTML=slots.map(([key,cls])=>{
+    const it=coord[key];if(!it)return'';
+    return`<div class="fp-slot ${cls}"><img src="${it.img||''}" alt="" onerror="this.style.opacity='.1'"></div>`;
+  }).join('');
+
+  // サイドプレビュー（PC）
+  sideStage.querySelectorAll('.fp-slot').forEach(e=>e.remove());
+  slots.forEach(([key,cls])=>{
+    const it=coord[key];if(!it)return;
+    const div=document.createElement('div');div.className=`fp-slot ${cls}`;
+    const img=document.createElement('img');img.src=it.img||'';img.alt='';
+    img.onerror=()=>{img.style.opacity='.15';};
+    div.appendChild(img);sideStage.appendChild(div);
+  });
 }
 
-function renderBrandChips() {
-  document.getElementById('brand-chips').innerHTML =
-    `<div class="chip ${fBrand==='all'?'on':''}" onclick="setBrand('all')">すべて</div>` +
-    [...brands].map(b =>
-      `<div class="chip ${fBrand===b?'on':''}" onclick="setBrand('${b.replace(/'/g,"\\'")}')">${b}</div>`
-    ).join('');
+function renderPrevModal(){
+  const body=document.getElementById('prev-modal-body');
+  const slots=activeSlots();
+  if(!slots.length){
+    body.innerHTML='<p style="color:rgba(255,255,255,.5);font-size:13px;text-align:center">アイテムを選んでください</p>';
+    return;
+  }
+  body.innerHTML=slots.map(([key,cls,lbl])=>{
+    const it=coord[key];if(!it)return'';
+    return`<div class="pm-slot ${cls}">
+      <img src="${it.img||''}" alt="" onerror="this.style.opacity='.1'">
+      <div class="pm-info">
+        <div class="pm-lbl">${lbl}</div>
+        <div class="pm-name">${it.name}</div>
+        <div class="pm-code">${it.code}</div>
+        <button class="pm-rm" data-part="${it.part}">✕ 外す</button>
+      </div>
+    </div>`;
+  }).join('');
 }
 
-function renderSaved() {
-  const bar = document.getElementById('svbar');
-  if (!saved.length) { bar.style.display = 'none'; return; }
-  bar.style.display = 'flex';
-  document.getElementById('svlist').innerHTML = saved.map(s =>
-    `<div class="sc2" onclick="loadSaved(${s.id})">${s.name}</div>`
-  ).join('');
-}
+document.getElementById('prev-modal-body').addEventListener('click',e=>{
+  const btn=e.target.closest('.pm-rm');if(!btn)return;
+  delete coord[btn.dataset.part];
+  render();renderFloatPrev();renderPrevModal();
+});
+
+function openPrevModal(){renderPrevModal();document.getElementById('prev-modal').classList.add('open');}
+function closePrevModal(){document.getElementById('prev-modal').classList.remove('open');}
 
 /* ================================================================
    操作
 ================================================================ */
-function pick(id) {
-  const it = ALL.find(x => x.id === id); if (!it) return;
-  if (coord[it.part] && coord[it.part].id === id) { delete coord[it.part]; }
-  else {
-    if (it.part === 'ワンピース') { delete coord['トップス']; delete coord['ボトムス']; }
-    if (it.part === 'トップス' || it.part === 'ボトムス') delete coord['ワンピース'];
-    coord[it.part] = it;
+function pick(id){
+  const it=ALL.find(x=>x.id===id);if(!it)return;
+  if(coord[it.part]&&coord[it.part].id===id)delete coord[it.part];
+  else{
+    if(it.part==='ワンピース'){delete coord['トップス'];delete coord['ボトムス'];}
+    if(it.part==='トップス'||it.part==='ボトムス')delete coord['ワンピース'];
+    coord[it.part]=it;
   }
-  render(); renderPrev();
+  render();renderFloatPrev();
 }
-function rmSlot(p) { delete coord[p]; render(); renderPrev(); }
-function clr() { coord = {}; render(); renderPrev(); }
-function rnd() {
-  coord = {};
-  const pool = filtered().length ? filtered() : ALL;
-  if (pool.some(x => x.part === 'ワンピース') && Math.random() > .4) {
-    const c = pool.filter(x => x.part === 'ワンピース');
-    coord['ワンピース'] = c[Math.floor(Math.random() * c.length)];
-  } else {
-    ['トップス','ボトムス'].forEach(p => {
-      const c = pool.filter(x => x.part === p);
-      if (c.length) coord[p] = c[Math.floor(Math.random() * c.length)];
-    });
+function clr(){coord={};render();renderFloatPrev();}
+function rnd(){
+  coord={};
+  const pool=filtered().length?filtered():ALL;
+  if(pool.some(x=>x.part==='ワンピース')&&Math.random()>.4){
+    const c=pool.filter(x=>x.part==='ワンピース');coord['ワンピース']=c[Math.floor(Math.random()*c.length)];
+  }else{
+    ['トップス','ボトムス'].forEach(p=>{const c=pool.filter(x=>x.part===p);if(c.length)coord[p]=c[Math.floor(Math.random()*c.length)];});
   }
-  ['シューズ','アクセサリ'].forEach(p => {
-    const c = pool.filter(x => x.part === p);
-    if (c.length) coord[p] = c[Math.floor(Math.random() * c.length)];
-  });
-  render(); renderPrev();
+  ['シューズ','アクセサリ'].forEach(p=>{const c=pool.filter(x=>x.part===p);if(c.length)coord[p]=c[Math.floor(Math.random()*c.length)];});
+  render();renderFloatPrev();
+  if(document.getElementById('prev-modal').classList.contains('open'))renderPrevModal();
 }
 
-function setSrc(v){ fSrc=v; document.querySelectorAll('#sc .chip').forEach((c,i)=>c.classList.toggle('on',['all','aipri','primagi'][i]===v)); render(); }
-function setPart(v){ fPart=v; document.querySelectorAll('#pc .chip').forEach((c,i)=>c.classList.toggle('on',['all','ワンピース','トップス','ボトムス','シューズ','アクセサリ'][i]===v)); render(); }
-function setBrand(v){ fBrand=v; renderBrandChips(); render(); }
+/* ================================================================
+   フィルター
+================================================================ */
+function setSrc(v){
+  fSrc=v;
+  ['all','aipri','primagi'].forEach(k=>document.getElementById('src-'+k).classList.toggle('on',k===v));
+  render();
+}
+function setPart(v){
+  fPart=v;
+  ['all','ワンピース','トップス','ボトムス','シューズ','アクセサリ'].forEach(k=>document.getElementById('part-'+k).classList.toggle('on',k===v));
+  render();
+}
 function setColor(v){
-  fColor = fColor===v ? '' : v;
-  document.querySelectorAll('.cdot').forEach(d => {
-    d.classList.remove('on');
-    if (d.id==='cd-'+fColor || (fColor===''&&d.id==='cd-')) d.classList.add('on');
-  });
+  fColor=fColor===v?'':v;
+  document.querySelectorAll('.cdot').forEach(d=>{d.classList.remove('on');if(d.id==='cd-'+fColor||(fColor===''&&d.id==='cd-'))d.classList.add('on');});
   render();
 }
 
-function loadSaved(id){ const s=saved.find(x=>x.id===id); if(!s)return; coord={...s.coord}; render(); renderPrev(); }
-
 /* ================================================================
-   保存ポップアップ
+   画像キャプチャ
 ================================================================ */
-// パーツ定義 [part_key, css_class, label, img_height(px), overlap_margin(px)]
-const SLOT_DEFS = [
-  ['アクセサリ', 'acce',     'アクセサリ', 80,  -12],
-  ['ワンピース', 'onepiece', 'ワンピース', 220, -22],
-  ['トップス',   'tops',     'トップス',   130, -16],
-  ['ボトムス',   'bottoms',  'ボトムス',   115, -16],
-  ['シューズ',   'shoes',    'シューズ',   85,   0],
-];
-
-function showSavePopup() {
-  if (!Object.keys(coord).length) { alert('アイテムを選んでください'); return; }
-
-  const overlay = document.createElement('div');
-  overlay.id = 'save-overlay';
-  overlay.innerHTML = `
-    <div class="save-header">
-      <button class="save-capture" onclick="captureCoord()">📸 画像を保存</button>
-      <label class="save-toggle">
-        <input type="checkbox" id="show-names" onchange="renderPopupCoord()"> パーツ名を表示
-      </label>
-      <button class="save-close" onclick="document.getElementById('save-overlay').remove()">✕ 閉じる</button>
-    </div>
-    <div id="popup-stage"></div>`;
-  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
-  document.body.appendChild(overlay);
-  renderPopupCoord();
-}
-
-function renderPopupCoord() {
-  const showNames = document.getElementById('show-names')?.checked;
-  const stage = document.getElementById('popup-stage');
-  if (!stage) return;
-  stage.innerHTML = '';
-
-  // ワンピース or トップス+ボトムス を決定
-  const slots = SLOT_DEFS.filter(([key]) => {
-    if (key === 'ワンピース') return !!coord['ワンピース'];
-    if (key === 'トップス')   return !coord['ワンピース'] && !!coord['トップス'];
-    if (key === 'ボトムス')   return !coord['ワンピース'] && !!coord['ボトムス'];
-    return !!coord[key];
-  });
-
-  slots.forEach(([key, , lbl, h, mb], i) => {
-    const it = coord[key];
-    if (!it) return;
-    const row = document.createElement('div');
-    row.className = 'popup-row';
-    row.style.marginBottom = i < slots.length-1 ? mb+'px' : '0';
-
-    const img = document.createElement('img');
-    img.src = it.img || '';
-    img.alt = it.name;
-    img.style.cssText = `height:${h}px;width:auto;max-width:${showNames?200:280}px;object-fit:contain;`;
-    img.onerror = () => { img.style.opacity = '.15'; };
-    row.appendChild(img);
-
-    if (showNames) {
-      const nm = document.createElement('div');
-      nm.className = 'popup-name';
-      nm.innerHTML = `<div class="popup-name-lbl">${lbl}</div>${it.name}`;
-      row.appendChild(nm);
-    }
-    stage.appendChild(row);
-  });
-}
-
-async function captureCoord() {
-  const stage = document.getElementById('popup-stage');
-  if (!stage) return;
-
-  const showNames = document.getElementById('show-names')?.checked;
-  const SLOT_W = showNames ? 360 : 280;
-  const SLOT_H_MAP = {acce:80, onepiece:220, tops:130, bottoms:115, shoes:85};
-  const OVERLAP    = {acce:-12, onepiece:-22, tops:-16, bottoms:-16, shoes:0};
-
-  // 描画対象スロットを決定
-  const slots = SLOT_DEFS.filter(([key]) => {
-    if (key === 'ワンピース') return !!coord['ワンピース'];
-    if (key === 'トップス')   return !coord['ワンピース'] && !!coord['トップス'];
-    if (key === 'ボトムス')   return !coord['ワンピース'] && !!coord['ボトムス'];
-    return !!coord[key];
-  });
-
-  // 全画像をロード
-  const images = await Promise.all(slots.map(([key]) => new Promise(res => {
-    const it = coord[key]; if(!it||!it.img){res(null);return;}
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => res(img);
-    img.onerror = () => {
-      // CORSなしで再試行
-      const img2 = new Image();
-      img2.onload = ()=>res(img2);
-      img2.onerror = ()=>res(null);
-      img2.src = it.img;
-    };
-    img.src = it.img + (it.img.includes('?')?'&':'?') + 't=' + Date.now();
+const SH={acce:65,onepiece:200,tops:115,bottoms:105,shoes:75};
+const SM={acce:-8,onepiece:-20,tops:-15,bottoms:-15,shoes:0};
+async function captureCoord(){
+  const slots=activeSlots();
+  if(!slots.length)return;
+  const W=300,SCALE=2;
+  const totalH=slots.reduce((s,[k],,i)=>{
+    const cls=SLOT_DEFS.find(d=>d[0]===k)[1];
+    return s+SH[cls]+(i<slots.length-1?SM[cls]:0);
+  },0);
+  const images=await Promise.all(slots.map(([key])=>new Promise(res=>{
+    const it=coord[key];if(!it||!it.img){res(null);return;}
+    const img=new Image();img.crossOrigin='anonymous';
+    img.onload=()=>res(img);
+    img.onerror=()=>{const i2=new Image();i2.onload=()=>res(i2);i2.onerror=()=>res(null);i2.src=it.img;};
+    img.src=it.img+(it.img.includes('?')?'&':'?')+'t='+Date.now();
   })));
-
-  // Canvas サイズ計算
-  let totalH = slots.reduce((sum, [key,,, h, mb], i) => {
-    const cls = SLOT_DEFS.find(d=>d[0]===key)[1];
-    return sum + h + (i < slots.length-1 ? mb : 0);
-  }, 0);
-
-  const SCALE = 2;
-  const canvas = document.createElement('canvas');
-  canvas.width  = SLOT_W * SCALE;
-  canvas.height = Math.max(totalH, 50) * SCALE;
-  const ctx = canvas.getContext('2d');
-  ctx.scale(SCALE, SCALE);
-
-  // 背景
-  ctx.fillStyle = '#180828';
-  ctx.fillRect(0, 0, SLOT_W, totalH);
-
-  // パーツを描画
-  let y = 0;
-  const IMG_W = showNames ? 200 : SLOT_W - 4;
-  slots.forEach(([key, cls, lbl, h, mb], i) => {
-    const img = images[i];
-    if (img) {
-      const ratio = Math.min(IMG_W / img.naturalWidth, h / img.naturalHeight);
-      const dw = img.naturalWidth * ratio;
-      const dh = img.naturalHeight * ratio;
-      ctx.drawImage(img, (IMG_W - dw) / 2, y + (h - dh) / 2, dw, dh);
+  const canvas=document.createElement('canvas');
+  canvas.width=W*SCALE;canvas.height=Math.max(totalH,50)*SCALE;
+  const ctx=canvas.getContext('2d');
+  ctx.scale(SCALE,SCALE);
+  ctx.fillStyle='#180828';ctx.fillRect(0,0,W,totalH);
+  let y=0;
+  slots.forEach(([key,cls],,i)=>{
+    const h=SH[cls],mb=SM[cls]||0,img=images[i];
+    if(img){
+      const ratio=Math.min((W-4)/img.naturalWidth,h/img.naturalHeight);
+      const dw=img.naturalWidth*ratio,dh=img.naturalHeight*ratio;
+      ctx.drawImage(img,(W-dw)/2,y+(h-dh)/2,dw,dh);
     }
-    if (showNames) {
-      ctx.fillStyle = '#F4A7C3';
-      ctx.font = '10px "Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif';
-      ctx.fillText(lbl, IMG_W + 12, y + 16);
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '11px "Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif';
-      const name = coord[key]?.name || '';
-      if (name.length <= 10) {
-        ctx.fillText(name, IMG_W + 12, y + 32);
-      } else {
-        ctx.fillText(name.slice(0, 10), IMG_W + 12, y + 32);
-        ctx.fillText(name.slice(10),    IMG_W + 12, y + 48);
-      }
-    }
-    y += h + (i < slots.length-1 ? mb : 0);
+    y+=h+(i<slots.length-1?mb:0);
   });
-
-  // 出力
-  canvas.toBlob(async blob => {
-    if (!blob) { alert('画像生成に失敗しました'); return; }
-    const url = URL.createObjectURL(blob);
-    // iOS Web Share API
-    if (navigator.share && navigator.canShare) {
-      const file = new File([blob], 'coord.png', {type:'image/png'});
-      if (navigator.canShare({files:[file]})) {
-        try {
-          await navigator.share({files:[file], title:'ミックスコーデ'});
-          URL.revokeObjectURL(url); return;
-        } catch(e) {}
-      }
+  canvas.toBlob(async blob=>{
+    if(!blob){alert('画像生成失敗');return;}
+    const url=URL.createObjectURL(blob);
+    if(navigator.share&&navigator.canShare){
+      const f=new File([blob],'coord.png',{type:'image/png'});
+      if(navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:'ミクコちゃん'});URL.revokeObjectURL(url);return;}catch(e){}}
     }
-    // 通常ダウンロード
-    const a = document.createElement('a');
-    a.href = url; a.download = 'coord.png'; a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 2000);
-  }, 'image/png');
+    const a=document.createElement('a');a.href=url;a.download='coord.png';a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),2000);
+  },'image/png');
 }
 
-/* ================================================================
-   保存コーデ
-================================================================ */
-// 保存ボタンは showSavePopup 内ではなく、別途名前付き保存を用意
-// （現状は画像出力メインなので saveCoord は右クリックメニューから呼ぶ想定）
-
-/* ================================================================
-   起動
-================================================================ */
-renderBrandChips();
+/* 起動 */
 render();
 loadData();
 </script>
