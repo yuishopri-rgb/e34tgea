@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>ミクコちゃん</title>
+<!-- 画像CDNへの接続を事前確立 -->
+<link rel="dns-prefetch" href="//aipri.jp">
+<link rel="dns-prefetch" href="//www.takaratomy-arts.co.jp">
+<link rel="preconnect" href="https://aipri.jp" crossorigin>
+<link rel="preconnect" href="https://www.takaratomy-arts.co.jp" crossorigin>
+<link rel="dns-prefetch" href="//raw.githubusercontent.com">
+<link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -124,7 +131,7 @@ body{font-family:-apple-system,'Hiragino Kaku Gothic ProN','Yu Gothic',sans-seri
   background:#fff;
   border-radius:20px;
   padding:20px 20px 20px;
-  width:100%;max-width:560px;
+  width:100%;max-width:440px;
   box-shadow:0 6px 30px rgba(0,0,0,.25);
 }
 .snap-title{
@@ -137,22 +144,22 @@ body{font-family:-apple-system,'Hiragino Kaku Gothic ProN','Yu Gothic',sans-seri
   letter-spacing:.04em;
 }
 
-/* ワンピ系: 3段構成（縦積み中央寄せ） */
-.snap-onepiece-layout{display:flex;flex-direction:column;align-items:center;gap:20px}
-.snap-onepiece-layout .snap-row{display:flex;align-items:center;gap:18px;width:100%;max-width:500px}
-.snap-onepiece-layout .snap-img-wrap{width:240px;flex-shrink:0;display:flex;justify-content:center;align-items:center}
+/* ワンピ系: 3段構成 */
+.snap-onepiece-layout{display:flex;flex-direction:column;align-items:center;gap:14px}
+.snap-onepiece-layout .snap-row{display:flex;align-items:center;gap:16px;width:100%;max-width:400px}
+.snap-onepiece-layout .snap-img-wrap{width:150px;flex-shrink:0;display:flex;justify-content:center;align-items:center}
 
-/* セパレート系: 4段構成（縦積み中央寄せ） */
-.snap-separate-layout{display:flex;flex-direction:column;align-items:center;gap:20px}
-.snap-separate-layout .snap-row{display:flex;align-items:center;gap:18px;width:100%;max-width:500px}
-.snap-separate-layout .snap-img-wrap{width:240px;flex-shrink:0;display:flex;justify-content:center;align-items:center}
+/* セパレート系: 4段構成 */
+.snap-separate-layout{display:flex;flex-direction:column;align-items:center;gap:14px}
+.snap-separate-layout .snap-row{display:flex;align-items:center;gap:16px;width:100%;max-width:400px}
+.snap-separate-layout .snap-img-wrap{width:150px;flex-shrink:0;display:flex;justify-content:center;align-items:center}
 
 .snap-row img{object-fit:contain;display:block;pointer-events:none;max-width:100%}
-.snap-row.r-acce    img{height:130px}
-.snap-row.r-onepiece img{height:160px}
-.snap-row.r-tops    img{height:200px}
-.snap-row.r-bottoms img{height:180px}
-.snap-row.r-shoes   img{height:140px}
+.snap-row.r-acce    img{height:80px}
+.snap-row.r-onepiece img{height:100px}
+.snap-row.r-tops    img{height:120px}
+.snap-row.r-bottoms img{height:110px}
+.snap-row.r-shoes   img{height:85px}
 
 .snap-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
 .snap-lbl{font-size:10px;color:var(--pk);font-weight:700;letter-spacing:.06em}
@@ -364,13 +371,16 @@ function _render(){
   document.getElementById('pcnt').textContent=list.length+'件';
   const g=document.getElementById('grid');
   if(!list.length){g.innerHTML=`<div class="msg">${ALL.length?'該当なし':'読み込み中...'}</div>`;return;}
-  g.innerHTML=list.map(it=>{
+  // 画像URL有無で分岐、loading=lazy + decoding=async + fetchpriority=low で並列負荷削減
+  g.innerHTML=list.map((it,i)=>{
     const sel=coord[it.part]&&coord[it.part].id===it.id;
     const pl=it.part==='アクセサリ'?'アクセ':it.part;
+    // 最初の30件は eager、それ以降は lazy
+    const loadAttr=i<30?'loading="eager" fetchpriority="high"':'loading="lazy" fetchpriority="low"';
     return`<div class="ic${sel?' sel':''}" data-id="${it.id}">
       <div class="bdg bs ${it.src==='aipri'?'bai':'bpm'}">${it.src==='aipri'?'AI':'PM'}</div>
       <div class="bdg bp b${it.part}">${pl}</div>
-      ${it.img?`<img src="${it.img}" alt="" loading="lazy" decoding="async">`:`<div class="no-img">${it.code}</div>`}
+      ${it.img?`<img src="${it.img}" alt="" ${loadAttr} decoding="async">`:`<div class="no-img">${it.code}</div>`}
       <div class="nm">${it.name}</div>
     </div>`;
   }).join('');
