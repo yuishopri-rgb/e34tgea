@@ -550,7 +550,7 @@ async function captureCoord(){
   const slots=activeSlots();
   if(!slots.length)return;
   const W=300,SCALE=2;
-  const totalH=slots.reduce((s,[k],,i)=>{
+  const totalH=slots.reduce((s,[k],i)=>{
     const cls=SLOT_DEFS.find(d=>d[0]===k)[1];
     return s+SH[cls]+(i<slots.length-1?SM[cls]:0);
   },0);
@@ -567,7 +567,7 @@ async function captureCoord(){
   ctx.scale(SCALE,SCALE);
   ctx.fillStyle='#180828';ctx.fillRect(0,0,W,totalH);
   let y=0;
-  slots.forEach(([key,cls],,i)=>{
+  slots.forEach(([key,cls,],i)=>{
     const h=SH[cls],mb=SM[cls]||0,img=images[i];
     if(img){
       const ratio=Math.min((W-4)/img.naturalWidth,h/img.naturalHeight);
