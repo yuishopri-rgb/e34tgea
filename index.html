@@ -393,7 +393,7 @@ const LS_KEY='mikoko_cache_v1';
 const seenIds=new Set();
 
 function pushRows(rows,file,store,brandSet){
-  const src=/\/(AP_|APR_|OAP_|APSP_)/.test(file)?'aipri':'primagi';
+  const src=/(^|\/)(AP_|APR_|OAP_|APSP_)/.test(file)?'aipri':'primagi';
   for(const row of rows){
     const [brand,cardId,name,part,imgUrl]=row;
     const id=src+'_'+cardId+'_'+part;
@@ -475,7 +475,7 @@ async function loadData(){
   const freshSeen=new Set();
   for(const r of results){
     if(!r) continue;
-    const src=/\/(AP_|APR_|OAP_|APSP_)/.test(r.file)?'aipri':'primagi';
+    const src=/(^|\/)(AP_|APR_|OAP_|APSP_)/.test(r.file)?'aipri':'primagi';
     for(const row of r.rows){
       const [brand,cardId,name,part,imgUrl]=row;
       const id=src+'_'+cardId+'_'+part;
