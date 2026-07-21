@@ -69,8 +69,6 @@ body{font-family:-apple-system,'Hiragino Kaku Gothic ProN','Yu Gothic',sans-seri
 .fb-label{font-size:10px;color:var(--t3);white-space:nowrap;flex-shrink:0;min-width:32px}
 .chip{padding:4px 9px;font-size:11px;border-radius:20px;border:.5px solid var(--bd2);background:var(--bg2);color:var(--t2);cursor:pointer;user-select:none;white-space:nowrap;flex-shrink:0;-webkit-appearance:none}
 .chip.on{background:var(--pk);border-color:var(--pk);color:#fff;font-weight:600}
-.cdot{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2.5px solid transparent;flex-shrink:0}
-.cdot.on{border-color:#333}
 .search-row{position:relative;flex-shrink:0}
 .search-row input{width:100%;padding:6px 10px 6px 28px;font-size:13px;border:.5px solid var(--bd2);border-radius:20px;background:var(--bg2);color:var(--t1);outline:none;-webkit-appearance:none}
 .search-row::before{content:'🔍';position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:11px;pointer-events:none}
@@ -240,18 +238,6 @@ body{font-family:-apple-system,'Hiragino Kaku Gothic ProN','Yu Gothic',sans-seri
     <div class="chip"    id="part-シューズ"  onclick="setPart('シューズ')">シューズ</div>
     <div class="chip"    id="part-アクセサリ" onclick="setPart('アクセサリ')">アクセ</div>
   </div>
-  <div class="fb-row">
-    <span class="fb-label">色</span>
-    <div class="cdot on" id="cd-" style="background:conic-gradient(#FF8FAB,#FFD166,#A0E7E5,#C7CEEA,#fff)" onclick="setColor('')"></div>
-    <div class="cdot" id="cd-ピンク"   style="background:#FF8FAB" onclick="setColor('ピンク')"></div>
-    <div class="cdot" id="cd-イエロー" style="background:#FFD166" onclick="setColor('イエロー')"></div>
-    <div class="cdot" id="cd-ブルー"   style="background:#7EC8E3" onclick="setColor('ブルー')"></div>
-    <div class="cdot" id="cd-グリーン" style="background:#B5EAD7" onclick="setColor('グリーン')"></div>
-    <div class="cdot" id="cd-パープル" style="background:#C7CEEA" onclick="setColor('パープル')"></div>
-    <div class="cdot" id="cd-オレンジ" style="background:#FFB347" onclick="setColor('オレンジ')"></div>
-    <div class="cdot" id="cd-ホワイト" style="background:#f0f0f0;border:.5px solid #ccc" onclick="setColor('ホワイト')"></div>
-    <div class="cdot" id="cd-ブラック" style="background:#555" onclick="setColor('ブラック')"></div>
-  </div>
 </div>
 
 <!-- メイン -->
@@ -309,18 +295,6 @@ body{font-family:-apple-system,'Hiragino Kaku Gothic ProN','Yu Gothic',sans-seri
 const GITHUB_RAW='https://raw.githubusercontent.com/yuishopri-rgb/e34tgea/main/';
 const MANIFEST_URL=GITHUB_RAW+'manifest.json';
 
-const CK={
-  'ピンク':['ピンク','ローズ','いちご','チェリー','ラズベリー','ベリー','コーラル','ハート'],
-  'ブルー':['ブルー','スカイ','ネイビー','みずいろ','ソーダ','マリン','アクア'],
-  'イエロー':['イエロー','ゴールド','レモン','ひまわり','サンシャイン','バナナ'],
-  'グリーン':['グリーン','ミント','リーフ','モスグリーン','エメラルド','マスカット'],
-  'パープル':['パープル','ラベンダー','バイオレット','ライラック','グレープ','ミッドナイト'],
-  'オレンジ':['オレンジ','アンバー','ピーチ','マカロン'],
-  'ホワイト':['ホワイト','ミルキー','パール','スノー','クリーム','シルバー','ウエディング','ウェディング'],
-  'ブラック':['ブラック','ダーク','ゴシック','ロック'],
-};
-// キーワード判定（フォールバック用）: CSVにcolor列がない旧データのみ使用
-function dc(n){for(const[c,kw]of Object.entries(CK))if(kw.some(k=>n.includes(k)))return c;return 'その他';}
 
 /* ===== セキュリティ対策 ===== */
 // HTMLエスケープ（XSS対策の基本）
@@ -355,7 +329,7 @@ function parseCsv(text){
   return rows;
 }
 
-let ALL=[],fSrc='all',fPart='all',fColor='',fBrand='all';
+let ALL=[],fSrc='all',fPart='all',fBrand='all';
 let coord={},brands=new Set();
 
 async function loadData(){
@@ -383,15 +357,12 @@ async function loadData(){
       const src=/\/(AP_|APR_|OAP_|APSP_)/.test(file)?'aipri':'primagi';
       const existing=new Set(ALL.map(x=>x.id));
       for(const row of rows){
-        const [brand,cardId,name,part,imgUrl,csvColor] = row;
+        const [brand,cardId,name,part,imgUrl] = row;
         const id=src+'_'+cardId+'_'+part;
         if(existing.has(id))continue;
         // URLバリデーション: http(s)以外は弾く
         const validImg = safeUrl(imgUrl);
-        // 色: CSVにcolor列があればそれを優先（画像から実判定済み・管理者調整可）
-        //     なければキーワード判定にフォールバック（旧形式CSV互換）
-        const color = (csvColor && csvColor.trim()) ? csvColor.trim() : dc(name);
-        ALL.push({id,code:cardId,name,part,src,brand,img:validImg,color});
+        ALL.push({id,code:cardId,name,part,src,brand,img:validImg});
         brands.add(brand);
       }
     }catch(e){}
@@ -419,7 +390,6 @@ function filtered(){
   return ALL.filter(it=>{
     if(fSrc!=='all'&&it.src!==fSrc)return false;
     if(fPart!=='all'&&it.part!==fPart)return false;
-    if(fColor&&it.color!==fColor)return false;
     if(fBrand!=='all'&&it.brand!==fBrand)return false;
     if(q&&!matchText(it.name,q)&&!matchText(it.code,q))return false;
     return true;
@@ -567,11 +537,6 @@ function renderBrandChips(){
 function setSrc(v){fSrc=v;['all','aipri','primagi'].forEach(k=>document.getElementById('src-'+k).classList.toggle('on',k===v));render();}
 function setPart(v){fPart=v;['all','ワンピース','トップス','ボトムス','シューズ','アクセサリ'].forEach(k=>document.getElementById('part-'+k).classList.toggle('on',k===v));render();}
 function setBrand(v){fBrand=v;renderBrandChips();render();}
-function setColor(v){
-  fColor=fColor===v?'':v;
-  document.querySelectorAll('.cdot').forEach(d=>{d.classList.remove('on');if(d.id==='cd-'+fColor||(fColor===''&&d.id==='cd-'))d.classList.add('on');});
-  render();
-}
 
 renderBrandChips();render();loadData();
 </script>
