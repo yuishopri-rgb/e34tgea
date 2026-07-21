@@ -6,7 +6,7 @@
 <title>ミクコちゃん</title>
 
 <!-- Content Security Policy: XSS二重防御 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://aipri.jp https://www.takaratomy-arts.co.jp https://yuishopri.com; connect-src 'self' https://raw.githubusercontent.com; font-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://aipri.jp https://www.takaratomy-arts.co.jp https://yuishopri.com; connect-src 'self' https://raw.githubusercontent.com https://cdn.jsdelivr.net; font-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';">
 
 <!-- ファビコン・iOSアイコン -->
 <link rel="icon" href="icon.png" type="image/png">
@@ -292,7 +292,20 @@ body{font-family:-apple-system,'Hiragino Kaku Gothic ProN','Yu Gothic',sans-seri
 </div>
 
 <script>
+/* ================================================================
+   データ取得元の設定
+
+   ★ 反映速度を優先する場合（推奨・現在の設定）
+     raw.githubusercontent.com + キャッシュバスター
+     → push後すぐ反映される。ただしアクセスが多いと制限がかかる場合あり
+
+   ★ 表示速度を優先する場合
+     下の GITHUB_RAW をコメントアウトして CDN_RAW を使う
+     → 世界中のCDNから配信されて高速。ただし更新反映に最大12時間かかる
+       （@main を @latest や特定のコミットハッシュにすると挙動が変わる）
+================================================================ */
 const GITHUB_RAW='https://raw.githubusercontent.com/yuishopri-rgb/e34tgea/main/';
+// const GITHUB_RAW='https://cdn.jsdelivr.net/gh/yuishopri-rgb/e34tgea@main/';
 const MANIFEST_URL=GITHUB_RAW+'manifest.json';
 
 
@@ -338,7 +351,7 @@ async function loadData(){
   dot.className='dot loading';
   let manifest;
   try{
-    const res=await fetch(MANIFEST_URL);
+    const res=await fetch(MANIFEST_URL+'?t='+Date.now(),{cache:'no-store'});
     if(!res.ok)throw new Error('HTTP '+res.status);
     manifest=await res.json();
   }catch(e){
@@ -351,7 +364,7 @@ async function loadData(){
   txt.textContent='0/'+total;
   for(const{file,label}of allFiles){
     try{
-      const res=await fetch(GITHUB_RAW+file);
+      const res=await fetch(GITHUB_RAW+file+'?t='+Date.now(),{cache:'no-store'});
       if(!res.ok){loaded++;txt.textContent=loaded+'/'+total;continue;}
       const rows=parseCsv(await res.text());
       const src=/\/(AP_|APR_|OAP_|APSP_)/.test(file)?'aipri':'primagi';
