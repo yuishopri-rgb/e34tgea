@@ -17,6 +17,10 @@
       { "file": "data/APR_06.csv",  "label": "リング6だん" },
       { "file": "data/OAP_01.csv",  "label": "おねがい1だん" },
       { "file": "data/OAP_02.csv",  "label": "おねがい2だん" },
+      { "file": "data/OAP_03.csv",  "label": "おねがい3だん" },
+      { "file": "data/OAP_04.csv",  "label": "おねがい4だん" },
+      { "file": "data/OAP_05.csv",  "label": "おねがい5だん" },
+      { "file": "data/OAP_06.csv",  "label": "おねがい6だん" },
       { "file": "data/APSP_01.csv", "label": "スペシャル" }
     ],
     "primagi": [
